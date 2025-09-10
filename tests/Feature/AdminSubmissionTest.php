@@ -177,13 +177,20 @@ test('admin can edit and update submission', function () {
         'mobile_number' => '09123456789',
         'ministry_involvement' => 'Music',
         'coach' => 'Test Coach',
-        'services_attended' => '2',
+        'services_attended' => '8AM',
         'victory_groups_leading' => 1,
         'victory_group_active' => true,
         'victory_group_types' => ['Singles'],
         'intern_invite_status' => 'yes',
         'victory_group_schedule' => 'Sunday 7PM',
         'venue' => 'Church',
+        'discipleship_classes' => [
+            'church_community' => true,
+            'purple_book' => true,
+            'making_disciples' => false,
+            'empowering_leaders' => false,
+            'leadership_113' => false,
+        ],
     ]);
     
     $response->assertRedirect(route('admin.submissions.show', $submission));

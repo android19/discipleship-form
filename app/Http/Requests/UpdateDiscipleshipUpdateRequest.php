@@ -11,8 +11,14 @@ class UpdateDiscipleshipUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $discipleship = $this->route('discipleship');
+        $discipleship = $this->route('discipleship') ?? $this->route('submission');
 
+        // Allow if user is admin
+        if ($this->user()->is_admin) {
+            return true;
+        }
+
+        // Allow if user owns the submission
         return $discipleship && $discipleship->user_id === $this->user()->id;
     }
 
