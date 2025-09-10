@@ -22,6 +22,11 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             FormTokenSeeder::class,
+            CoachSeeder::class,
+            LeaderSeeder::class,
+            VictoryGroupSeeder::class,
+            MemberSeeder::class,
+            MemberDiscipleshipClassSeeder::class,
         ]);
     }
 }
