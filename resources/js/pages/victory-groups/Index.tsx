@@ -55,8 +55,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Index({ victoryGroups, leaders, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
-    const [status, setStatus] = useState(filters.status || '');
-    const [leaderId, setLeaderId] = useState(filters.leader_id || '');
+    const [status, setStatus] = useState(filters.status || 'all');
+    const [leaderId, setLeaderId] = useState(filters.leader_id || 'all');
 
     // Debounced search function
     const debouncedSearch = useDebouncedCallback(
@@ -85,13 +85,13 @@ export default function Index({ victoryGroups, leaders, filters }: Props) {
         const params: any = { search };
         
         if (filterType === 'status') {
-            setStatus(value);
+            setStatus(value === '' ? 'all' : value);
             params.status = value;
-            params.leader_id = leaderId;
+            params.leader_id = leaderId === 'all' ? '' : leaderId;
         } else if (filterType === 'leader_id') {
-            setLeaderId(value);
+            setLeaderId(value === '' ? 'all' : value);
             params.leader_id = value;
-            params.status = status;
+            params.status = status === 'all' ? '' : status;
         }
 
         router.get('/victory-groups', params, {
@@ -135,22 +135,22 @@ export default function Index({ victoryGroups, leaders, filters }: Props) {
                                 onChange={handleSearchChange}
                                 className="max-w-md"
                             />
-                            <Select value={status} onValueChange={(value) => handleFilterChange('status', value)}>
+                            <Select value={status} onValueChange={(value) => handleFilterChange('status', value === 'all' ? '' : value)}>
                                 <SelectTrigger className="w-[180px]">
                                     <SelectValue placeholder="Filter by status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All Status</SelectItem>
+                                    <SelectItem value="all">All Status</SelectItem>
                                     <SelectItem value="Active">Active</SelectItem>
                                     <SelectItem value="Inactive">Inactive</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <Select value={leaderId} onValueChange={(value) => handleFilterChange('leader_id', value)}>
+                            <Select value={leaderId} onValueChange={(value) => handleFilterChange('leader_id', value === 'all' ? '' : value)}>
                                 <SelectTrigger className="w-[200px]">
                                     <SelectValue placeholder="Filter by Leader" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All Leaders</SelectItem>
+                                    <SelectItem value="all">All Leaders</SelectItem>
                                     {leaders.map((leader) => (
                                         <SelectItem key={leader.id} value={leader.id.toString()}>
                                             {leader.full_name}

@@ -62,8 +62,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Index({ leaders, coaches, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
-    const [status, setStatus] = useState(filters.status || '');
-    const [coachId, setCoachId] = useState(filters.coach_id || '');
+    const [status, setStatus] = useState(filters.status || 'all');
+    const [coachId, setCoachId] = useState(filters.coach_id || 'all');
 
     // Debounced search function
     const debouncedSearch = useDebouncedCallback(
@@ -92,13 +92,13 @@ export default function Index({ leaders, coaches, filters }: Props) {
         const params: any = { search };
         
         if (filterType === 'status') {
-            setStatus(value);
+            setStatus(value === '' ? 'all' : value);
             params.status = value;
-            params.coach_id = coachId;
+            params.coach_id = coachId === 'all' ? '' : coachId;
         } else if (filterType === 'coach_id') {
-            setCoachId(value);
+            setCoachId(value === '' ? 'all' : value);
             params.coach_id = value;
-            params.status = status;
+            params.status = status === 'all' ? '' : status;
         }
 
         router.get('/leaders', params, {
@@ -142,22 +142,22 @@ export default function Index({ leaders, coaches, filters }: Props) {
                                 onChange={handleSearchChange}
                                 className="max-w-md"
                             />
-                            <Select value={status} onValueChange={(value) => handleFilterChange('status', value)}>
+                            <Select value={status} onValueChange={(value) => handleFilterChange('status', value === 'all' ? '' : value)}>
                                 <SelectTrigger className="w-[180px]">
                                     <SelectValue placeholder="Filter by status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All Status</SelectItem>
+                                    <SelectItem value="all">All Status</SelectItem>
                                     <SelectItem value="Active">Active</SelectItem>
                                     <SelectItem value="Inactive">Inactive</SelectItem>
                                 </SelectContent>
                             </Select>
-                            <Select value={coachId} onValueChange={(value) => handleFilterChange('coach_id', value)}>
+                            <Select value={coachId} onValueChange={(value) => handleFilterChange('coach_id', value === 'all' ? '' : value)}>
                                 <SelectTrigger className="w-[200px]">
                                     <SelectValue placeholder="Filter by Coach" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">All Coaches</SelectItem>
+                                    <SelectItem value="all">All Coaches</SelectItem>
                                     {coaches.map((coach) => (
                                         <SelectItem key={coach.id} value={coach.id.toString()}>
                                             {coach.full_name}

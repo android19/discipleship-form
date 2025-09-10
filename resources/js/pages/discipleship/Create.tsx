@@ -122,6 +122,12 @@ export default function Create({ coaches, members: availableMembers }: Props) {
     };
 
     const handleMemberSelect = (memberId: string, selectedMemberId: string) => {
+        if (selectedMemberId === '') {
+            updateMember(memberId, 'member_id', null);
+            updateMember(memberId, 'name', '');
+            return;
+        }
+
         const selectedMember = availableMembers.find(m => m.value.toString() === selectedMemberId);
         if (selectedMember) {
             updateMember(memberId, 'member_id', selectedMember.value);
@@ -449,14 +455,14 @@ export default function Create({ coaches, members: availableMembers }: Props) {
                                                     <tr key={member.id}>
                                                         <td className="border border-gray-300 p-2">
                                                             <Select 
-                                                                value={member.member_id?.toString() || ''} 
-                                                                onValueChange={(value) => handleMemberSelect(member.id, value)}
+                                                                value={member.member_id?.toString() || 'manual'} 
+                                                                onValueChange={(value) => handleMemberSelect(member.id, value === 'manual' ? '' : value)}
                                                             >
                                                                 <SelectTrigger>
                                                                     <SelectValue placeholder="Select Member" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
-                                                                    <SelectItem value="">Manual Entry</SelectItem>
+                                                                    <SelectItem value="manual">Manual Entry</SelectItem>
                                                                     {availableMembers.map((availableMember) => (
                                                                         <SelectItem key={availableMember.value} value={availableMember.value.toString()}>
                                                                             {availableMember.label}
