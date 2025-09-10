@@ -16,8 +16,19 @@ interface CoachOption {
     label: string;
 }
 
+interface MemberOption {
+    value: number;
+    label: string;
+    member: {
+        id: number;
+        full_name: string;
+        victory_group?: string;
+    };
+}
+
 interface Props {
     coaches: CoachOption[];
+    members: MemberOption[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -33,6 +44,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface Member {
     id: string;
+    member_id: number | null;
     name: string;
     one_to_one_facilitator: string;
     one_to_one_date_started: string;
@@ -45,7 +57,7 @@ interface Member {
     remarks: string;
 }
 
-export default function Create({ coaches }: Props) {
+export default function Create({ coaches, members: availableMembers }: Props) {
     const [members, setMembers] = useState<Member[]>([]);
     const [interns, setInterns] = useState<Member[]>([]);
     const [discipleshipClasses, setDiscipleshipClasses] = useState({
@@ -66,6 +78,7 @@ export default function Create({ coaches }: Props) {
     const addMember = () => {
         const newMember: Member = {
             id: Math.random().toString(36).substr(2, 9),
+            member_id: null,
             name: '',
             one_to_one_facilitator: '',
             one_to_one_date_started: '',
@@ -108,6 +121,17 @@ export default function Create({ coaches }: Props) {
         ));
     };
 
+    const handleMemberSelect = (memberId: string, selectedMemberId: string) => {
+        const selectedMember = availableMembers.find(m => m.value.toString() === selectedMemberId);
+        if (selectedMember) {
+            updateMember(memberId, 'member_id', selectedMember.value);
+            updateMember(memberId, 'name', selectedMember.member.full_name);
+        } else {
+            updateMember(memberId, 'member_id', null);
+            updateMember(memberId, 'name', '');
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Discipleship Update" />
@@ -125,6 +149,7 @@ export default function Create({ coaches }: Props) {
                             {/* Hidden inputs for member boolean fields */}
                             {members.map((member, index) => (
                                 <div key={member.id}>
+                                    <input type="hidden" name={`members[${index}][member_id]`} value={member.member_id || ''} />
                                     <input type="hidden" name={`members[${index}][victory_weekend]`} value={member.victory_weekend ? '1' : '0'} />
                                     <input type="hidden" name={`members[${index}][purple_book]`} value={member.purple_book ? '1' : '0'} />
                                     <input type="hidden" name={`members[${index}][church_community]`} value={member.church_community ? '1' : '0'} />
@@ -423,11 +448,31 @@ export default function Create({ coaches }: Props) {
                                                 {members.map((member, index) => (
                                                     <tr key={member.id}>
                                                         <td className="border border-gray-300 p-2">
-                                                            <Input
-                                                                value={member.name}
-                                                                onChange={(e) => updateMember(member.id, 'name', e.target.value)}
-                                                                name={`members[${index}][name]`}
-                                                            />
+                                                            <Select 
+                                                                value={member.member_id?.toString() || ''} 
+                                                                onValueChange={(value) => handleMemberSelect(member.id, value)}
+                                                            >
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Select Member" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="">Manual Entry</SelectItem>
+                                                                    {availableMembers.map((availableMember) => (
+                                                                        <SelectItem key={availableMember.value} value={availableMember.value.toString()}>
+                                                                            {availableMember.label}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {!member.member_id && (
+                                                                <Input
+                                                                    className="mt-2"
+                                                                    placeholder="Enter member name manually"
+                                                                    value={member.name}
+                                                                    onChange={(e) => updateMember(member.id, 'name', e.target.value)}
+                                                                    name={`members[${index}][name]`}
+                                                                />
+                                                            )}
                                                         </td>
                                                         <td className="border border-gray-300 p-2">
                                                             <div className="space-y-1">

@@ -82,38 +82,38 @@ class PublicDiscipleshipController extends Controller
                 'suggestions' => [
                     'Double-check the token you entered',
                     'Contact your ministry leader for a new token',
-                    'Make sure you copied the complete token'
-                ]
+                    'Make sure you copied the complete token',
+                ],
             ]);
         }
 
         if (! $formToken->isValid()) {
             // Clear session if exists
             session()->forget(['public_form_token', 'public_form_leader']);
-            
+
             $reason = '';
             $suggestions = [];
-            
+
             if (! $formToken->is_active) {
                 $reason = 'Token has been deactivated';
                 $suggestions = [
                     'This token has been disabled by an administrator',
                     'Contact your ministry leader for assistance',
-                    'Request a new active token'
+                    'Request a new active token',
                 ];
             } elseif ($formToken->expires_at < now()) {
                 $reason = 'Token has expired';
                 $suggestions = [
-                    'This token expired on ' . $formToken->expires_at->format('F j, Y \a\t g:i A'),
+                    'This token expired on '.$formToken->expires_at->format('F j, Y \a\t g:i A'),
                     'Contact your ministry leader for a new token',
-                    'Tokens have expiration dates for security purposes'
+                    'Tokens have expiration dates for security purposes',
                 ];
             } elseif ($formToken->max_uses && $formToken->used_count >= $formToken->max_uses) {
                 $reason = 'Token usage limit reached';
                 $suggestions = [
-                    'This token has reached its maximum usage limit of ' . $formToken->max_uses . ' uses',
+                    'This token has reached its maximum usage limit of '.$formToken->max_uses.' uses',
                     'Contact your ministry leader to reset the usage count',
-                    'Request a new token with higher usage limits'
+                    'Request a new token with higher usage limits',
                 ];
             }
 
@@ -128,7 +128,7 @@ class PublicDiscipleshipController extends Controller
                     'used_count' => $formToken->used_count,
                     'max_uses' => $formToken->max_uses,
                     'is_active' => $formToken->is_active,
-                ]
+                ],
             ]);
         }
 
@@ -141,8 +141,8 @@ class PublicDiscipleshipController extends Controller
                 'suggestions' => [
                     'Please enter your token again to start a new session',
                     'Make sure you are using the correct token',
-                    'Clear your browser cookies and try again'
-                ]
+                    'Clear your browser cookies and try again',
+                ],
             ]);
         }
 
@@ -156,10 +156,27 @@ class PublicDiscipleshipController extends Controller
                 'label' => $coach->full_name,
             ]);
 
+        // Get members for selection
+        $members = \App\Models\Member::active()
+            ->with('victoryGroup:id,name')
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get()
+            ->map(fn ($member) => [
+                'value' => $member->id,
+                'label' => $member->full_name.($member->victoryGroup ? ' ('.$member->victoryGroup->name.')' : ''),
+                'member' => [
+                    'id' => $member->id,
+                    'full_name' => $member->full_name,
+                    'victory_group' => $member->victoryGroup?->name,
+                ],
+            ]);
+
         return Inertia::render('public/DiscipleshipForm', [
             'token' => $token,
             'leaderName' => $formToken->leader_name,
             'coaches' => $coaches,
+            'members' => $members,
             'tokenInfo' => [
                 'remaining_uses' => $formToken->remaining_uses,
                 'expires_at' => $formToken->expires_at->format('M j, Y g:i A'),

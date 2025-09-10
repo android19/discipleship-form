@@ -36,6 +36,7 @@ class DiscipleshipUpdate extends Model
         'reviewed_at',
         'review_notes',
         'assigned_to_user_id',
+        'victory_group_id',
     ];
 
     protected function casts(): array
@@ -88,5 +89,10 @@ class DiscipleshipUpdate extends Model
     public function assignedToUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to_user_id');
+    }
+
+    public function victoryGroup(): BelongsTo
+    {
+        return $this->belongsTo(VictoryGroup::class);
     }
 }

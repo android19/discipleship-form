@@ -15,10 +15,21 @@ interface CoachOption {
     label: string;
 }
 
+interface MemberOption {
+    value: number;
+    label: string;
+    member: {
+        id: number;
+        full_name: string;
+        victory_group?: string;
+    };
+}
+
 interface Props {
     token: string;
     leaderName: string;
     coaches: CoachOption[];
+    members: MemberOption[];
     tokenInfo: {
         remaining_uses: number | string;
         expires_at: string;
@@ -27,6 +38,7 @@ interface Props {
 
 interface Member {
     id: string;
+    member_id: number | null;
     name: string;
     one_to_one_facilitator: string;
     one_to_one_date_started: string;
@@ -39,7 +51,7 @@ interface Member {
     remarks: string;
 }
 
-export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo }: Props) {
+export default function DiscipleshipForm({ token, leaderName, coaches, members: availableMembers, tokenInfo }: Props) {
     const [members, setMembers] = useState<Member[]>([]);
     const [interns, setInterns] = useState<Member[]>([]);
     const [discipleshipClasses, setDiscipleshipClasses] = useState({
@@ -60,6 +72,7 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
     const addMember = () => {
         const newMember: Member = {
             id: Math.random().toString(36).substring(2, 11),
+            member_id: null,
             name: '',
             one_to_one_facilitator: '',
             one_to_one_date_started: '',
@@ -77,7 +90,7 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
     const addInternFromMember = (memberName: string) => {
         // Find the member by name
         const selectedMember = members.find(member => member.name === memberName);
-        
+
         if (selectedMember && !interns.some(intern => intern.name === memberName)) {
             // Create intern with all data from the selected member
             const newIntern: Member = {
@@ -100,6 +113,17 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
         setMembers(members.map(member =>
             member.id === id ? { ...member, [field]: value } : member
         ));
+    };
+
+    const handleMemberSelect = (memberId: string, selectedMemberId: string) => {
+        const selectedMember = availableMembers.find(m => m.value.toString() === selectedMemberId);
+        if (selectedMember) {
+            updateMember(memberId, 'member_id', selectedMember.value);
+            updateMember(memberId, 'name', selectedMember.member.full_name);
+        } else {
+            updateMember(memberId, 'member_id', null);
+            updateMember(memberId, 'name', '');
+        }
     };
 
     return (
@@ -138,7 +162,7 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
                                         <input type="hidden" name={`interns[${index}][empowering_leaders]`} value={intern.empowering_leaders ? '1' : '0'} />
                                     </div>
                                 ))}
-                                
+
                                 {/* Header */}
                                 <Card className="bg-red-600 text-white p-6">
                                     <h1 className="text-2xl font-bold text-center">
@@ -250,7 +274,7 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
                                             />
                                             <InputError message={errors.victory_groups_leading} />
                                         </div>
-                                        
+
                                         <div className="space-y-4">
                                             <div>
                                                 <Label>Is your Victory Group active? *</Label>
@@ -265,7 +289,7 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
                                                     </label>
                                                 </div>
                                             </div>
-                                            
+
                                             <div>
                                                 <Label htmlFor="inactive_reason">
                                                     If No, please specify reason:
@@ -402,7 +426,7 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
                                                 <thead>
                                                     <tr className="bg-green-100">
                                                         <th className="border border-gray-300 px-2 py-2 text-left">Name *</th>
-                                                        <th className="border border-gray-300 px-2 py-2 text-left">1-on-1 Facilitator</th>
+                                                        <th className="border border-gray-300 px-2 py-2 text-left">One2One Facilitator</th>
                                                         <th className="border border-gray-300 px-2 py-2 text-left">Date Started</th>
                                                         <th className="border border-gray-300 px-2 py-2 text-center">Victory Weekend</th>
                                                         <th className="border border-gray-300 px-2 py-2 text-center">Purple Book</th>
@@ -525,7 +549,7 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
                                     <h2 className="text-xl font-semibold mb-4 text-orange-600">
                                         Victory Group Interns
                                     </h2>
-                                    
+
                                     {/* Add Intern Dropdown */}
                                     <div className="mb-4">
                                         <Label htmlFor="intern_selector">Add Intern from Victory Group Members</Label>
@@ -570,10 +594,10 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
                                                             Remove
                                                         </Button>
                                                     </div>
-                                                    
+
                                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                                                         <div>
-                                                            <Label className="text-gray-600">1-on-1 Facilitator</Label>
+                                                            <Label className="text-gray-600">One2One Facilitator</Label>
                                                             <p className="font-medium">{intern.one_to_one_facilitator || 'Not specified'}</p>
                                                         </div>
                                                         <div>
@@ -585,7 +609,7 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
                                                             <p className="font-medium">{intern.ministry_involvement || 'Not specified'}</p>
                                                         </div>
                                                     </div>
-                                                    
+
                                                     <div className="mt-3">
                                                         <Label className="text-gray-600">Discipleship Progress</Label>
                                                         <div className="flex flex-wrap gap-2 mt-1">
@@ -596,14 +620,14 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
                                                             {intern.empowering_leaders && <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Empowering Leaders</span>}
                                                         </div>
                                                     </div>
-                                                    
+
                                                     {intern.remarks && (
                                                         <div className="mt-3">
                                                             <Label className="text-gray-600">Remarks</Label>
                                                             <p className="text-sm text-gray-800 mt-1">{intern.remarks}</p>
                                                         </div>
                                                     )}
-                                                    
+
                                                     {/* Hidden inputs for form submission */}
                                                     <div className="hidden">
                                                         <input type="hidden" name={`interns[${index}][name]`} value={intern.name} />
@@ -616,7 +640,7 @@ export default function DiscipleshipForm({ token, leaderName, coaches, tokenInfo
                                             ))}
                                         </div>
                                     )}
-                                    
+
                                     {interns.length === 0 && (
                                         <div className="text-center py-8 text-gray-500">
                                             <p>No interns selected yet.</p>

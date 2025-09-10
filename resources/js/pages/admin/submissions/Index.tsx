@@ -47,7 +47,7 @@ interface Props extends PageProps {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Admin Dashboard',
+        title: 'Submissions',
         href: '/admin/submissions',
     },
 ];
@@ -94,7 +94,7 @@ export default function Index({ submissions, stats, filters }: Props) {
     };
 
     const getSubmissionTypeBadge = (submission: Submission) => {
-        return submission.form_token 
+        return submission.form_token
             ? <Badge className="bg-orange-100 text-orange-800">Token</Badge>
             : <Badge className="bg-purple-100 text-purple-800">Auth</Badge>;
     };
@@ -102,12 +102,12 @@ export default function Index({ submissions, stats, filters }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Admin - Review Submissions" />
-            
+
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
                 {/* Header */}
                 <Card className="bg-red-600 text-white p-6">
                     <h1 className="text-2xl font-bold text-center">
-                        ADMIN SUBMISSION REVIEW
+                        REVIEW SUBMISSIONS
                     </h1>
                     <p className="text-center mt-2">
                         Manage and review all discipleship submissions

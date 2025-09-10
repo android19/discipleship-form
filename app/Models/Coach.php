@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Coach extends Model
 {
@@ -53,5 +54,37 @@ class Coach extends Model
     public function scopeInactive($query)
     {
         return $query->where('status', 'Inactive');
+    }
+
+    /**
+     * Get all leaders that this coach coaches.
+     */
+    public function leaders(): HasMany
+    {
+        return $this->hasMany(Leader::class);
+    }
+
+    /**
+     * Get active leaders that this coach coaches.
+     */
+    public function activeLeaders(): HasMany
+    {
+        return $this->leaders()->where('status', 'Active');
+    }
+
+    /**
+     * Get the count of leaders this coach coaches.
+     */
+    public function getLeadersCountAttribute(): int
+    {
+        return $this->leaders()->count();
+    }
+
+    /**
+     * Get the count of active leaders this coach coaches.
+     */
+    public function getActiveLeadersCountAttribute(): int
+    {
+        return $this->activeLeaders()->count();
     }
 }

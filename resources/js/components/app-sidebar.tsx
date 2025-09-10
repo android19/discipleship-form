@@ -20,6 +20,21 @@ const mainNavItems: NavItem[] = [
         icon: Users,
     },
     {
+        title: 'Members',
+        href: '/members',
+        icon: Users,
+    },
+    {
+        title: 'Leaders',
+        href: '/leaders',
+        icon: UserCheck,
+    },
+    {
+        title: 'Victory Groups',
+        href: '/victory-groups',
+        icon: Users,
+    },
+    {
         title: 'Coaches',
         href: '/coaches',
         icon: UserCheck,
@@ -31,27 +46,27 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
+// const footerNavItems: NavItem[] = [
+//     {
+//         title: 'Repository',
+//         href: 'https://github.com/laravel/react-starter-kit',
+//         icon: Folder,
+//     },
+//     {
+//         title: 'Documentation',
+//         href: 'https://laravel.com/docs/starter-kits#react',
+//         icon: BookOpen,
+//     },
+// ];
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
-    
+
     // Build navigation items with conditional admin link
     const navigationItems = [
         ...mainNavItems,
         ...(auth.user.is_admin ? [{
-            title: 'Admin Dashboard',
+            title: 'Submissions',
             href: '/admin/submissions',
             icon: Shield,
         }] : [])
@@ -76,7 +91,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

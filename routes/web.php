@@ -4,6 +4,9 @@ use App\Http\Controllers\AdminSubmissionController;
 use App\Http\Controllers\CoachController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DiscipleshipController;
+use App\Http\Controllers\LeaderController;
+use App\Http\Controllers\MemberController;
+use App\Http\Controllers\VictoryGroupController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -36,6 +39,35 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('api/coaches/list', [CoachController::class, 'list'])
         ->name('coaches.list');
 
+    // Member Management Routes
+    Route::resource('members', MemberController::class);
+
+    // API route for member selection (for dropdowns)
+    Route::get('api/members/selection', [MemberController::class, 'getMembersForSelection'])
+        ->name('members.selection');
+
+    // Leader Management Routes
+    Route::resource('leaders', LeaderController::class);
+
+    // API route for leader selection (for dropdowns)
+    Route::get('api/leaders/selection', [LeaderController::class, 'getLeadersForSelection'])
+        ->name('leaders.selection');
+
+    // Victory Group Management Routes
+    Route::resource('victory-groups', VictoryGroupController::class)->names([
+        'index' => 'victory-groups.index',
+        'create' => 'victory-groups.create',
+        'store' => 'victory-groups.store',
+        'show' => 'victory-groups.show',
+        'edit' => 'victory-groups.edit',
+        'update' => 'victory-groups.update',
+        'destroy' => 'victory-groups.destroy',
+    ]);
+
+    // API route for victory group selection (for dropdowns)
+    Route::get('api/victory-groups/selection', [VictoryGroupController::class, 'getVictoryGroupsForSelection'])
+        ->name('victory-groups.selection');
+
     // Form Token Management Routes
     Route::resource('tokens', App\Http\Controllers\FormTokenController::class);
     Route::patch('tokens/{token}/deactivate', [App\Http\Controllers\FormTokenController::class, 'deactivate'])
@@ -50,7 +82,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
     // Admin Submission Management Routes
     Route::resource('submissions', AdminSubmissionController::class)->except(['create', 'store']);
-    
+
     // Additional admin actions
     Route::post('submissions/{submission}/approve', [AdminSubmissionController::class, 'approve'])
         ->name('submissions.approve');

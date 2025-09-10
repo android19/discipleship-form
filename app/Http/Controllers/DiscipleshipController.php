@@ -45,8 +45,25 @@ class DiscipleshipController extends Controller
                 'label' => $coach->full_name,
             ]);
 
+        // Get members for selection
+        $members = \App\Models\Member::active()
+            ->with('victoryGroup:id,name')
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get()
+            ->map(fn ($member) => [
+                'value' => $member->id,
+                'label' => $member->full_name.($member->victoryGroup ? ' ('.$member->victoryGroup->name.')' : ''),
+                'member' => [
+                    'id' => $member->id,
+                    'full_name' => $member->full_name,
+                    'victory_group' => $member->victoryGroup?->name,
+                ],
+            ]);
+
         return Inertia::render('discipleship/Create', [
             'coaches' => $coaches,
+            'members' => $members,
         ]);
     }
 

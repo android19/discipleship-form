@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Coach;
 use App\Models\DiscipleshipUpdate;
+use App\Models\Leader;
+use App\Models\Member;
+use App\Models\VictoryGroup;
 use App\Models\VictoryGroupMember;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,12 +19,13 @@ class DashboardController extends Controller
      */
     public function index(): Response
     {
-        // Get basic counts
+        // Get basic counts - include both new and old data
         $stats = [
-            'leaders' => $this->getLeadersCount(),
+            'leaders' => $this->getLeadersCount() + $this->getNewLeadersCount(),
             'coaches' => $this->getCoachesCount(),
-            'members' => $this->getMembersCount(),
+            'members' => $this->getMembersCount() + $this->getNewMembersCount(),
             'interns' => $this->getInternsCount(),
+            'victory_groups' => $this->getVictoryGroupsCount(),
         ];
 
         // Get discipleship course completion statistics
@@ -92,8 +95,8 @@ class DashboardController extends Controller
         return VictoryGroupMember::whereHas('discipleshipUpdate', function ($query) {
             $query->where('status', 'approved');
         })->whereNotNull('one_to_one_facilitator')
-        ->where('one_to_one_facilitator', '!=', '')
-        ->count();
+            ->where('one_to_one_facilitator', '!=', '')
+            ->count();
     }
 
     /**
@@ -208,11 +211,11 @@ class DashboardController extends Controller
         $memberMinistries = VictoryGroupMember::whereHas('discipleshipUpdate', function ($query) {
             $query->where('status', 'approved');
         })->whereNotNull('ministry_involvement')
-        ->where('ministry_involvement', '!=', '')
-        ->select('ministry_involvement', DB::raw('count(*) as count'))
-        ->groupBy('ministry_involvement')
-        ->pluck('count', 'ministry_involvement')
-        ->toArray();
+            ->where('ministry_involvement', '!=', '')
+            ->select('ministry_involvement', DB::raw('count(*) as count'))
+            ->groupBy('ministry_involvement')
+            ->pluck('count', 'ministry_involvement')
+            ->toArray();
 
         // Merge and sum the counts
         $combined = [];
@@ -227,5 +230,29 @@ class DashboardController extends Controller
         arsort($combined);
 
         return $combined;
+    }
+
+    /**
+     * Get count of leaders from new leaders table.
+     */
+    private function getNewLeadersCount(): int
+    {
+        return Leader::where('status', 'Active')->count();
+    }
+
+    /**
+     * Get count of members from new members table.
+     */
+    private function getNewMembersCount(): int
+    {
+        return Member::where('status', 'Active')->count();
+    }
+
+    /**
+     * Get count of active victory groups.
+     */
+    private function getVictoryGroupsCount(): int
+    {
+        return VictoryGroup::where('status', 'Active')->count();
     }
 }

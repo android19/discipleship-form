@@ -85,7 +85,7 @@ interface Props extends PageProps {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Admin Dashboard',
+        title: 'Submissions',
         href: '/admin/submissions',
     },
     {
@@ -170,7 +170,7 @@ export default function Show({ submission, availableUsers }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Review Submission #${submission.id}`} />
-            
+
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
                 {/* Header */}
                 <Card className="bg-red-600 text-white p-6">
@@ -198,7 +198,7 @@ export default function Show({ submission, availableUsers }: Props) {
                                 Mark Under Review
                             </Button>
                         )}
-                        
+
                         {['submitted', 'under_review'].includes(submission.status) && (
                             <>
                                 <Link href={`/admin/submissions/${submission.id}/edit`}>
@@ -239,7 +239,7 @@ export default function Show({ submission, availableUsers }: Props) {
                     <Card className="p-6">
                         <h2 className="text-xl font-semibold mb-4 text-blue-600">Review Information</h2>
                         <div className="space-y-3">
-                            <div><strong>Status:</strong> 
+                            <div><strong>Status:</strong>
                                 <Badge className={`ml-2 ${statusColors[submission.status as keyof typeof statusColors]}`}>
                                     {submission.status.replace('_', ' ').toUpperCase()}
                                 </Badge>
