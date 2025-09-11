@@ -116,11 +116,13 @@ export default function Create({ leaders }: Props) {
                                             <SelectValue placeholder="Select Leader (optional)" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {leaders.map((leader) => (
+                                            {leaders && leaders.length > 0 ? leaders.map((leader) => (
                                                 <SelectItem key={leader.id} value={leader.id.toString()}>
                                                     {leader.full_name} {leader.coach && `(Coach: ${leader.coach.full_name})`}
                                                 </SelectItem>
-                                            ))}
+                                            )) : (
+                                                <SelectItem value="" disabled>No leaders available</SelectItem>
+                                            )}
                                         </SelectContent>
                                     </Select>
                                     {errors.leader_id && <div className="text-red-600 text-sm mt-1">{errors.leader_id}</div>}

@@ -181,11 +181,13 @@ export default function Create({ coaches }: Props) {
                                             <SelectValue placeholder="Select Coach (optional)" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {coaches.map((coach) => (
+                                            {coaches && coaches.length > 0 ? coaches.map((coach) => (
                                                 <SelectItem key={coach.id} value={coach.id.toString()}>
                                                     {coach.full_name}
                                                 </SelectItem>
-                                            ))}
+                                            )) : (
+                                                <SelectItem value="" disabled>No coaches available</SelectItem>
+                                            )}
                                         </SelectContent>
                                     </Select>
                                     {errors.coach_id && <div className="text-red-600 text-sm mt-1">{errors.coach_id}</div>}

@@ -68,11 +68,7 @@ class VictoryGroupController extends Controller
         $leaders = Leader::active()
             ->orderBy('first_name')
             ->orderBy('last_name')
-            ->get()
-            ->map(fn ($leader) => [
-                'value' => $leader->id,
-                'label' => $leader->full_name,
-            ]);
+            ->get();
 
         return Inertia::render('victory-groups/Create', [
             'leaders' => $leaders,
@@ -120,11 +116,7 @@ class VictoryGroupController extends Controller
         $leaders = Leader::active()
             ->orderBy('first_name')
             ->orderBy('last_name')
-            ->get()
-            ->map(fn ($leader) => [
-                'value' => $leader->id,
-                'label' => $leader->full_name,
-            ]);
+            ->get();
 
         return Inertia::render('victory-groups/Edit', [
             'victoryGroup' => $victoryGroup,

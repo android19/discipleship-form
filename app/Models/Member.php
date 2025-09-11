@@ -31,6 +31,10 @@ class Member extends Model
         'age' => 'integer',
     ];
 
+    protected $appends = [
+        'full_name',
+    ];
+
     /**
      * Get the member's full name.
      */

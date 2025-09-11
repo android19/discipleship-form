@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Head } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
+import Pagination from '@/components/ui/pagination';
 
 interface Coach {
     id: number;
@@ -184,11 +185,16 @@ export default function Index({ coaches, filters }: Props) {
                         )}
                     </div>
 
-                    {/* Pagination info */}
+                    {/* Pagination */}
                     {coaches.total > 0 && (
-                        <div className="mt-4 text-sm text-gray-600 text-center">
-                            Showing {coaches.data.length} of {coaches.total} coaches
-                        </div>
+                        <Pagination
+                            links={coaches.links}
+                            currentPage={coaches.current_page}
+                            lastPage={coaches.last_page}
+                            total={coaches.total}
+                            perPage={coaches.per_page}
+                            showing={coaches.data.length}
+                        />
                     )}
                 </Card>
             </div>

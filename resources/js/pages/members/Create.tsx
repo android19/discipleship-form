@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Head } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
 
@@ -20,6 +21,7 @@ interface VictoryGroup {
 
 interface Props {
     victoryGroups: VictoryGroup[];
+    discipleshipClasses: Record<string, string>;
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -33,7 +35,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Create({ victoryGroups }: Props) {
+export default function Create({ victoryGroups, discipleshipClasses }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Member" />
@@ -126,17 +128,22 @@ export default function Create({ victoryGroups }: Props) {
                                     
                                     <div>
                                         <Label htmlFor="lifestage">Lifestage *</Label>
-                                        <Input 
-                                            id="lifestage" 
-                                            name="lifestage" 
-                                            placeholder="e.g., Student, Single, Married, Single Parent"
-                                            required 
-                                        />
+                                        <Select name="lifestage" required>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select lifestage" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Student">Student</SelectItem>
+                                                <SelectItem value="Single">Single</SelectItem>
+                                                <SelectItem value="Married">Married</SelectItem>
+                                                <SelectItem value="Senior Citizen">Senior Citizen</SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                         {errors.lifestage && <div className="text-red-600 text-sm mt-1">{errors.lifestage}</div>}
                                     </div>
                                     
                                     <div>
-                                        <Label htmlFor="date_launched">Date Launched *</Label>
+                                        <Label htmlFor="date_launched">Date Baptized *</Label>
                                         <Input 
                                             id="date_launched" 
                                             name="date_launched" 
@@ -185,17 +192,79 @@ export default function Create({ victoryGroups }: Props) {
                                             <SelectValue placeholder="Select Victory Group (optional)" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {victoryGroups.map((group) => (
+                                            {victoryGroups && victoryGroups.length > 0 ? victoryGroups.map((group) => (
                                                 <SelectItem key={group.id} value={group.id.toString()}>
                                                     {group.name} {group.leader && `(Leader: ${group.leader.full_name})`}
                                                 </SelectItem>
-                                            ))}
+                                            )) : (
+                                                <SelectItem value="" disabled>No victory groups available</SelectItem>
+                                            )}
                                         </SelectContent>
                                     </Select>
                                     {errors.victory_group_id && <div className="text-red-600 text-sm mt-1">{errors.victory_group_id}</div>}
                                     <p className="text-sm text-gray-600 mt-1">
                                         Victory Group assignment is optional and can be changed later.
                                     </p>
+                                </div>
+                            </Card>
+
+                            {/* Discipleship Classes */}
+                            <Card className="p-6">
+                                <h2 className="text-xl font-semibold mb-4 text-green-600">
+                                    Discipleship Classes Progress
+                                </h2>
+                                <div className="space-y-4">
+                                    <p className="text-sm text-gray-600 mb-4">
+                                        Select completed or in-progress discipleship classes for this member.
+                                    </p>
+                                    
+                                    {Object.entries(discipleshipClasses).map(([classKey, className]) => (
+                                        <div key={classKey} className="border rounded-lg p-4 bg-gray-50">
+                                            <div className="flex items-center space-x-2 mb-3">
+                                                <Checkbox 
+                                                    name={`discipleship_classes[${classKey}][selected]`}
+                                                    value="1"
+                                                    id={`class_${classKey}`}
+                                                />
+                                                <Label 
+                                                    htmlFor={`class_${classKey}`}
+                                                    className="font-medium text-gray-900"
+                                                >
+                                                    {className}
+                                                </Label>
+                                            </div>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-6">
+                                                <div>
+                                                    <Label htmlFor={`class_${classKey}_start`} className="text-sm">
+                                                        Date Started
+                                                    </Label>
+                                                    <Input
+                                                        type="date"
+                                                        id={`class_${classKey}_start`}
+                                                        name={`discipleship_classes[${classKey}][date_started]`}
+                                                        className="mt-1"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label htmlFor={`class_${classKey}_finish`} className="text-sm">
+                                                        Date Finished (optional)
+                                                    </Label>
+                                                    <Input
+                                                        type="date"
+                                                        id={`class_${classKey}_finish`}
+                                                        name={`discipleship_classes[${classKey}][date_finished]`}
+                                                        className="mt-1"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                <div className="mt-4 text-sm text-gray-600">
+                                    <p>💡 <strong>Tip:</strong> If a finish date is provided, the class will be marked as completed.</p>
+                                    <p>💡 Classes with only start dates will be marked as "in progress".</p>
                                 </div>
                             </Card>
 

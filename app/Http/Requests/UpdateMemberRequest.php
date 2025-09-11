@@ -32,7 +32,20 @@ class UpdateMemberRequest extends FormRequest
             'address' => ['required', 'string'],
             'date_launched' => ['required', 'date'],
             'status' => ['required', 'in:Active,Inactive'],
-            'victory_group_id' => ['nullable', 'exists:victory_groups,id'],
+            'victory_group_id' => ['nullable', 'string', function ($attribute, $value, $fail) {
+                if ($value !== null && $value !== 'none' && !\App\Models\VictoryGroup::where('id', $value)->exists()) {
+                    $fail('The selected victory group does not exist.');
+                }
+            }],
+            'discipleship_classes' => ['sometimes', 'array'],
+            'discipleship_classes.*.selected' => ['sometimes', 'accepted'],
+            'discipleship_classes.*.date_started' => ['nullable', 'date', 'before_or_equal:today'],
+            'discipleship_classes.*.date_finished' => ['nullable', 'date', 'after_or_equal:discipleship_classes.*.date_started'],
+            'existing_classes' => ['sometimes', 'array'],
+            'existing_classes.*.delete' => ['sometimes', 'accepted'],
+            'existing_classes.*.date_started' => ['nullable', 'date', 'before_or_equal:today'],
+            'existing_classes.*.date_finished' => ['nullable', 'date', 'after_or_equal:existing_classes.*.date_started'],
+            'existing_classes.*.is_completed' => ['sometimes', 'accepted'],
         ];
     }
 
@@ -60,6 +73,10 @@ class UpdateMemberRequest extends FormRequest
             'status.required' => 'Status is required.',
             'status.in' => 'Status must be either Active or Inactive.',
             'victory_group_id.exists' => 'The selected victory group does not exist.',
+            'discipleship_classes.*.date_started.before_or_equal' => 'Start date cannot be in the future.',
+            'discipleship_classes.*.date_finished.after_or_equal' => 'Finish date must be after or equal to start date.',
+            'existing_classes.*.date_started.before_or_equal' => 'Start date cannot be in the future.',
+            'existing_classes.*.date_finished.after_or_equal' => 'Finish date must be after or equal to start date.',
         ];
     }
 }

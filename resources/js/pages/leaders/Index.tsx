@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Head } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
+import Pagination from '@/components/ui/pagination';
 
 interface Leader {
     id: number;
@@ -158,11 +159,13 @@ export default function Index({ leaders, coaches, filters }: Props) {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Coaches</SelectItem>
-                                    {coaches.map((coach) => (
+                                    {coaches && coaches.length > 0 ? coaches.map((coach) => (
                                         <SelectItem key={coach.id} value={coach.id.toString()}>
                                             {coach.full_name}
                                         </SelectItem>
-                                    ))}
+                                    )) : (
+                                        <SelectItem value="" disabled>No coaches available</SelectItem>
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -263,11 +266,16 @@ export default function Index({ leaders, coaches, filters }: Props) {
                         )}
                     </div>
 
-                    {/* Pagination info */}
+                    {/* Pagination */}
                     {leaders.total > 0 && (
-                        <div className="mt-4 text-sm text-gray-600 text-center">
-                            Showing {leaders.data.length} of {leaders.total} leaders
-                        </div>
+                        <Pagination
+                            links={leaders.links}
+                            currentPage={leaders.current_page}
+                            lastPage={leaders.last_page}
+                            total={leaders.total}
+                            perPage={leaders.per_page}
+                            showing={leaders.data.length}
+                        />
                     )}
                 </Card>
             </div>

@@ -31,6 +31,10 @@ class Leader extends Model
         'age' => 'integer',
     ];
 
+    protected $appends = [
+        'full_name',
+    ];
+
     /**
      * Get the leader's full name.
      */

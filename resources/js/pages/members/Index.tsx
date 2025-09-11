@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Head } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
+import Pagination from '@/components/ui/pagination';
 
 interface Member {
     id: number;
@@ -157,11 +158,13 @@ export default function Index({ members, victoryGroups, filters }: Props) {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Victory Groups</SelectItem>
-                                    {victoryGroups.map((group) => (
+                                    {victoryGroups && victoryGroups.length > 0 ? victoryGroups.map((group) => (
                                         <SelectItem key={group.id} value={group.id.toString()}>
                                             {group.name}
                                         </SelectItem>
-                                    ))}
+                                    )) : (
+                                        <SelectItem value="" disabled>No victory groups available</SelectItem>
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -256,11 +259,16 @@ export default function Index({ members, victoryGroups, filters }: Props) {
                         )}
                     </div>
 
-                    {/* Pagination info */}
+                    {/* Pagination */}
                     {members.total > 0 && (
-                        <div className="mt-4 text-sm text-gray-600 text-center">
-                            Showing {members.data.length} of {members.total} members
-                        </div>
+                        <Pagination
+                            links={members.links}
+                            currentPage={members.current_page}
+                            lastPage={members.last_page}
+                            total={members.total}
+                            perPage={members.per_page}
+                            showing={members.data.length}
+                        />
                     )}
                 </Card>
             </div>

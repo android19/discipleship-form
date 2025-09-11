@@ -19,6 +19,10 @@ class MemberDiscipleshipClass extends Model
         'is_completed',
     ];
 
+    protected $appends = [
+        'status',
+    ];
+
     protected $casts = [
         'date_started' => 'date',
         'date_finished' => 'date',

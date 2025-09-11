@@ -66,11 +66,7 @@ class LeaderController extends Controller
         $coaches = Coach::active()
             ->orderBy('first_name')
             ->orderBy('last_name')
-            ->get()
-            ->map(fn ($coach) => [
-                'value' => $coach->id,
-                'label' => $coach->full_name,
-            ]);
+            ->get();
 
         return Inertia::render('leaders/Create', [
             'coaches' => $coaches,
@@ -116,11 +112,7 @@ class LeaderController extends Controller
         $coaches = Coach::active()
             ->orderBy('first_name')
             ->orderBy('last_name')
-            ->get()
-            ->map(fn ($coach) => [
-                'value' => $coach->id,
-                'label' => $coach->full_name,
-            ]);
+            ->get();
 
         return Inertia::render('leaders/Edit', [
             'leader' => $leader,

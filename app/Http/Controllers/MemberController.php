@@ -65,14 +65,22 @@ class MemberController extends Controller
         $victoryGroups = VictoryGroup::with('leader')
             ->active()
             ->orderBy('name')
-            ->get()
-            ->map(fn ($vg) => [
-                'value' => $vg->id,
-                'label' => $vg->name.($vg->leader ? ' ('.$vg->leader->full_name.')' : ''),
-            ]);
+            ->get();
+
+        // Available discipleship classes
+        $discipleshipClasses = [
+            'one2one' => 'One2One',
+            'victory_weekend' => 'Victory Weekend',
+            'church_community' => 'Church Community',
+            'purple_book' => 'Purple Book',
+            'making_disciples' => 'Making Disciples',
+            'empowering_leaders' => 'Empowering Leaders',
+            'leadership_113' => 'Leadership 113',
+        ];
 
         return Inertia::render('members/Create', [
             'victoryGroups' => $victoryGroups,
+            'discipleshipClasses' => $discipleshipClasses,
         ]);
     }
 
@@ -81,7 +89,22 @@ class MemberController extends Controller
      */
     public function store(StoreMemberRequest $request): RedirectResponse
     {
-        $member = Member::create($request->validated());
+        $memberData = $request->safe()->except(['discipleship_classes']);
+        $member = Member::create($memberData);
+
+        // Handle discipleship classes if provided
+        if ($request->has('discipleship_classes')) {
+            foreach ($request->discipleship_classes as $className => $classData) {
+                if (! empty($classData['selected'])) {
+                    $member->discipleshipClasses()->create([
+                        'class_name' => $className,
+                        'date_started' => $classData['date_started'] ?? null,
+                        'date_finished' => $classData['date_finished'] ?? null,
+                        'is_completed' => ! empty($classData['date_finished']),
+                    ]);
+                }
+            }
+        }
 
         return redirect()->route('members.show', $member)
             ->with('success', 'Member created successfully!');
@@ -99,8 +122,20 @@ class MemberController extends Controller
             },
         ]);
 
+        // Available discipleship classes for reference
+        $discipleshipClasses = [
+            'one2one' => 'One2One',
+            'victory_weekend' => 'Victory Weekend',
+            'church_community' => 'Church Community',
+            'purple_book' => 'Purple Book',
+            'making_disciples' => 'Making Disciples',
+            'empowering_leaders' => 'Empowering Leaders',
+            'leadership_113' => 'Leadership 113',
+        ];
+
         return Inertia::render('members/Show', [
             'member' => $member,
+            'discipleshipClasses' => $discipleshipClasses,
         ]);
     }
 
@@ -109,20 +144,33 @@ class MemberController extends Controller
      */
     public function edit(Member $member): Response
     {
-        $member->load('victoryGroup');
+        $member->load([
+            'victoryGroup',
+            'discipleshipClasses' => function ($query) {
+                $query->orderBy('class_name');
+            },
+        ]);
 
         $victoryGroups = VictoryGroup::with('leader')
             ->active()
             ->orderBy('name')
-            ->get()
-            ->map(fn ($vg) => [
-                'value' => $vg->id,
-                'label' => $vg->name.($vg->leader ? ' ('.$vg->leader->full_name.')' : ''),
-            ]);
+            ->get();
+
+        // Available discipleship classes
+        $discipleshipClasses = [
+            'one2one' => 'One2One',
+            'victory_weekend' => 'Victory Weekend',
+            'church_community' => 'Church Community',
+            'purple_book' => 'Purple Book',
+            'making_disciples' => 'Making Disciples',
+            'empowering_leaders' => 'Empowering Leaders',
+            'leadership_113' => 'Leadership 113',
+        ];
 
         return Inertia::render('members/Edit', [
             'member' => $member,
             'victoryGroups' => $victoryGroups,
+            'discipleshipClasses' => $discipleshipClasses,
         ]);
     }
 
@@ -131,7 +179,64 @@ class MemberController extends Controller
      */
     public function update(UpdateMemberRequest $request, Member $member): RedirectResponse
     {
-        $member->update($request->validated());
+        $memberData = $request->safe()->except(['discipleship_classes', 'existing_classes']);
+        
+        // Handle victory group assignment with "none" value
+        if ($memberData['victory_group_id'] === 'none') {
+            $memberData['victory_group_id'] = null;
+        }
+        
+        $member->update($memberData);
+
+        // Handle existing discipleship classes (edit/delete)
+        if ($request->has('existing_classes')) {
+            foreach ($request->existing_classes as $classId => $classData) {
+                $existingClass = $member->discipleshipClasses()->find($classId);
+                
+                if ($existingClass) {
+                    // Check if this class should be deleted
+                    if (! empty($classData['delete'])) {
+                        $existingClass->delete();
+                        continue;
+                    }
+                    
+                    // Update the existing class
+                    $updateData = [
+                        'date_started' => $classData['date_started'] ?? null,
+                        'date_finished' => $classData['date_finished'] ?? null,
+                        'is_completed' => ! empty($classData['is_completed']),
+                    ];
+                    
+                    // Auto-mark as completed if finish date is provided
+                    if (! empty($classData['date_finished'])) {
+                        $updateData['is_completed'] = true;
+                    }
+                    
+                    $existingClass->update($updateData);
+                }
+            }
+        }
+
+        // Handle new discipleship classes if provided
+        if ($request->has('discipleship_classes')) {
+            foreach ($request->discipleship_classes as $className => $classData) {
+                if (! empty($classData['selected'])) {
+                    // Check if this class already exists for the member
+                    $existingClass = $member->discipleshipClasses()
+                        ->where('class_name', $className)
+                        ->first();
+
+                    if (! $existingClass) {
+                        $member->discipleshipClasses()->create([
+                            'class_name' => $className,
+                            'date_started' => $classData['date_started'] ?? null,
+                            'date_finished' => $classData['date_finished'] ?? null,
+                            'is_completed' => ! empty($classData['date_finished']) || ! empty($classData['is_completed']),
+                        ]);
+                    }
+                }
+            }
+        }
 
         return redirect()->route('members.show', $member)
             ->with('success', 'Member updated successfully!');

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Head } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
+import Pagination from '@/components/ui/pagination';
 
 interface VictoryGroup {
     id: number;
@@ -151,11 +152,13 @@ export default function Index({ victoryGroups, leaders, filters }: Props) {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Leaders</SelectItem>
-                                    {leaders.map((leader) => (
+                                    {leaders && leaders.length > 0 ? leaders.map((leader) => (
                                         <SelectItem key={leader.id} value={leader.id.toString()}>
                                             {leader.full_name}
                                         </SelectItem>
-                                    ))}
+                                    )) : (
+                                        <SelectItem value="" disabled>No leaders available</SelectItem>
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -252,11 +255,16 @@ export default function Index({ victoryGroups, leaders, filters }: Props) {
                         )}
                     </div>
 
-                    {/* Pagination info */}
+                    {/* Pagination */}
                     {victoryGroups.total > 0 && (
-                        <div className="mt-4 text-sm text-gray-600 text-center">
-                            Showing {victoryGroups.data.length} of {victoryGroups.total} victory groups
-                        </div>
+                        <Pagination
+                            links={victoryGroups.links}
+                            currentPage={victoryGroups.current_page}
+                            lastPage={victoryGroups.last_page}
+                            total={victoryGroups.total}
+                            perPage={victoryGroups.per_page}
+                            showing={victoryGroups.data.length}
+                        />
                     )}
                 </Card>
             </div>
