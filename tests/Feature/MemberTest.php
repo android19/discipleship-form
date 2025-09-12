@@ -3,6 +3,7 @@
 use App\Models\Coach;
 use App\Models\Leader;
 use App\Models\Member;
+use App\Models\Ministry;
 use App\Models\User;
 use App\Models\VictoryGroup;
 
@@ -87,7 +88,7 @@ test('member can be created successfully', function () {
         'age' => 25,
         'sex' => 'Male',
         'contact_number' => '09123456789',
-        'lifestage' => 'Singles',
+        'lifestage' => 'Single',
         'address' => '123 Test Street',
         'date_launched' => '2024-01-01',
         'status' => 'Active',
@@ -185,7 +186,7 @@ test('member can be updated', function () {
         'address' => '456 Updated Street',
         'date_launched' => '2024-02-01',
         'status' => 'Active',
-        'victory_group_id' => $victoryGroup->id,
+        'victory_group_id' => (string) $victoryGroup->id,
     ];
 
     $response = $this->put(route('members.update', $member), $updateData);
@@ -279,4 +280,86 @@ test('member scopes work correctly', function () {
 
     expect(Member::active()->count())->toBe(2);
     expect(Member::inactive()->count())->toBe(1);
+});
+
+test('member edit page loads with correct date format', function () {
+    $user = User::factory()->create();
+    $member = Member::factory()->create([
+        'date_launched' => '2023-01-15',
+    ]);
+
+    $this->actingAs($user);
+
+    $response = $this->get(route('members.edit', $member));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('members/Edit')
+        ->has('member')
+        ->where('member.date_launched', '2023-01-15T00:00:00.000000Z')  // Laravel returns as ISO datetime
+    );
+});
+
+test('member can be updated without date validation errors', function () {
+    $user = User::factory()->create();
+    $coach = Coach::factory()->create();
+    $leader = Leader::factory()->create(['coach_id' => $coach->id]);
+    $victoryGroup = VictoryGroup::factory()->create(['leader_id' => $leader->id]);
+    $member = Member::factory()->create([
+        'victory_group_id' => $victoryGroup->id,
+        'date_launched' => '2023-01-15',
+    ]);
+
+    $this->actingAs($user);
+
+    // Update member without changing date_launched
+    $response = $this->put(route('members.update', $member), [
+        'first_name' => 'Updated',
+        'middle_initial' => $member->middle_initial,
+        'last_name' => $member->last_name,
+        'age' => $member->age,
+        'sex' => $member->sex,
+        'contact_number' => $member->contact_number,
+        'lifestage' => $member->lifestage,
+        'address' => $member->address,
+        'date_launched' => '2023-01-15', // Same date, should not cause validation error
+        'status' => $member->status,
+        'victory_group_id' => (string) $member->victory_group_id,
+    ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+    $response->assertSessionHasNoErrors();
+
+    $member->refresh();
+    expect($member->first_name)->toBe('Updated');
+    expect($member->date_launched->format('Y-m-d'))->toBe('2023-01-15');
+});
+
+test('members index page includes ministry data', function () {
+    $user = User::factory()->create();
+    $member = Member::factory()->create();
+
+    // Create ministries for the member
+    $ministry1 = Ministry::factory()->active()->create([
+        'member_id' => $member->id,
+        'name' => 'Worship Team',
+    ]);
+    $ministry2 = Ministry::factory()->rest()->create([
+        'member_id' => $member->id,
+        'name' => 'Ushers Ministry',
+    ]);
+
+    $this->actingAs($user);
+
+    $response = $this->get(route('members.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('members/Index')
+        ->has('members.data')
+        ->has('members.data.0.ministries', 2)
+        ->where('members.data.0.ministries.0.name', 'Worship Team')
+        ->where('members.data.0.ministries.1.name', 'Ushers Ministry')
+    );
 });

@@ -10,6 +10,15 @@ import { Head } from '@inertiajs/react';
 import { type BreadcrumbItem } from '@/types';
 import Pagination from '@/components/ui/pagination';
 
+interface Ministry {
+    id: number;
+    name: string;
+    date_started: string;
+    status: string;
+    status_label: string;
+    status_color: string;
+}
+
 interface Member {
     id: number;
     first_name: string;
@@ -27,6 +36,7 @@ interface Member {
         id: number;
         name: string;
     };
+    ministries?: Ministry[];
     created_at: string;
     updated_at: string;
 }
@@ -188,6 +198,7 @@ export default function Index({ members, victoryGroups, filters }: Props) {
                                     <th className="border border-gray-300 p-3 text-left">Contact</th>
                                     <th className="border border-gray-300 p-3 text-left">Lifestage</th>
                                     <th className="border border-gray-300 p-3 text-left">Victory Group</th>
+                                    <th className="border border-gray-300 p-3 text-left">Ministry Involvement</th>
                                     <th className="border border-gray-300 p-3 text-left">Date Launched</th>
                                     <th className="border border-gray-300 p-3 text-center">Status</th>
                                     <th className="border border-gray-300 p-3 text-center">Actions</th>
@@ -210,6 +221,24 @@ export default function Index({ members, victoryGroups, filters }: Props) {
                                                 </span>
                                             ) : (
                                                 <span className="text-gray-400">No group assigned</span>
+                                            )}
+                                        </td>
+                                        <td className="border border-gray-300 p-3">
+                                            {member.ministries && member.ministries.length > 0 ? (
+                                                <div className="space-y-1">
+                                                    {member.ministries.map((ministry) => (
+                                                        <div key={ministry.id} className="flex items-center gap-2">
+                                                            <span className="text-sm font-medium text-gray-900">
+                                                                {ministry.name}
+                                                            </span>
+                                                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${ministry.status_color}`}>
+                                                                {ministry.status_label}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm">No ministries</span>
                                             )}
                                         </td>
                                         <td className="border border-gray-300 p-3">

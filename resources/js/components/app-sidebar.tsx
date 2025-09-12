@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users, UserCheck, Key, Shield } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Users, UserCheck, Key, Shield, Building } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -62,14 +62,21 @@ const mainNavItems: NavItem[] = [
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
 
-    // Build navigation items with conditional admin link
+    // Build navigation items with conditional admin links
     const navigationItems = [
         ...mainNavItems,
-        ...(auth.user.is_admin ? [{
-            title: 'Submissions',
-            href: '/admin/submissions',
-            icon: Shield,
-        }] : [])
+        ...(auth.user.is_admin ? [
+            {
+                title: 'Ministry Involvement',
+                href: '/ministries',
+                icon: Building,
+            },
+            {
+                title: 'Submissions',
+                href: '/admin/submissions',
+                icon: Shield,
+            }
+        ] : [])
     ];
 
     return (

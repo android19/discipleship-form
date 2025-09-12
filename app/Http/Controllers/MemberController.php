@@ -19,7 +19,7 @@ class MemberController extends Controller
     public function index(Request $request): Response
     {
         $query = Member::query()
-            ->with(['victoryGroup.leader'])
+            ->with(['victoryGroup.leader', 'ministries'])
             ->withCount('discipleshipClasses');
 
         // Apply search filter
@@ -89,7 +89,7 @@ class MemberController extends Controller
      */
     public function store(StoreMemberRequest $request): RedirectResponse
     {
-        $memberData = $request->safe()->except(['discipleship_classes']);
+        $memberData = $request->safe()->except(['discipleship_classes', 'ministries']);
         $member = Member::create($memberData);
 
         // Handle discipleship classes if provided
@@ -101,6 +101,19 @@ class MemberController extends Controller
                         'date_started' => $classData['date_started'] ?? null,
                         'date_finished' => $classData['date_finished'] ?? null,
                         'is_completed' => ! empty($classData['date_finished']),
+                    ]);
+                }
+            }
+        }
+
+        // Handle ministries if provided
+        if ($request->has('ministries')) {
+            foreach ($request->ministries as $ministryData) {
+                if (! empty($ministryData['name']) && ! empty($ministryData['date_started'])) {
+                    $member->ministries()->create([
+                        'name' => $ministryData['name'],
+                        'date_started' => $ministryData['date_started'],
+                        'status' => $ministryData['status'] ?? 'active',
                     ]);
                 }
             }
@@ -186,38 +199,39 @@ class MemberController extends Controller
     public function update(UpdateMemberRequest $request, Member $member): RedirectResponse
     {
         $memberData = $request->safe()->except(['discipleship_classes', 'existing_classes', 'ministries', 'existing_ministries']);
-        
+
         // Handle victory group assignment with "none" value
         if ($memberData['victory_group_id'] === 'none') {
             $memberData['victory_group_id'] = null;
         }
-        
+
         $member->update($memberData);
 
         // Handle existing discipleship classes (edit/delete)
         if ($request->has('existing_classes')) {
             foreach ($request->existing_classes as $classId => $classData) {
                 $existingClass = $member->discipleshipClasses()->find($classId);
-                
+
                 if ($existingClass) {
                     // Check if this class should be deleted
                     if (! empty($classData['delete'])) {
                         $existingClass->delete();
+
                         continue;
                     }
-                    
+
                     // Update the existing class
                     $updateData = [
                         'date_started' => $classData['date_started'] ?? null,
                         'date_finished' => $classData['date_finished'] ?? null,
                         'is_completed' => ! empty($classData['is_completed']),
                     ];
-                    
+
                     // Auto-mark as completed if finish date is provided
                     if (! empty($classData['date_finished'])) {
                         $updateData['is_completed'] = true;
                     }
-                    
+
                     $existingClass->update($updateData);
                 }
             }
@@ -248,21 +262,22 @@ class MemberController extends Controller
         if ($request->has('existing_ministries')) {
             foreach ($request->existing_ministries as $ministryId => $ministryData) {
                 $existingMinistry = $member->ministries()->find($ministryId);
-                
+
                 if ($existingMinistry) {
                     // Check if this ministry should be deleted
                     if (! empty($ministryData['delete'])) {
                         $existingMinistry->delete();
+
                         continue;
                     }
-                    
+
                     // Update the existing ministry
                     $updateData = [
                         'name' => $ministryData['name'] ?? $existingMinistry->name,
                         'date_started' => $ministryData['date_started'] ?? $existingMinistry->date_started,
                         'status' => $ministryData['status'] ?? $existingMinistry->status,
                     ];
-                    
+
                     $existingMinistry->update($updateData);
                 }
             }

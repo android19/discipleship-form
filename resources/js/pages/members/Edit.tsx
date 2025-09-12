@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Form } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
@@ -67,7 +68,52 @@ interface Props {
     discipleshipClasses: Record<string, string>;
 }
 
+interface NewMinistry {
+    id: string;
+    name: string;
+    date_started: string;
+    status: string;
+}
+
+const MINISTRY_OPTIONS = [
+    'Admin',
+    'Comms', 
+    'Coordinator',
+    'Kids',
+    'Music',
+    'Tech',
+    'Spirit Empowerment',
+    'Ushering',
+    'Worship Team',
+    'Prayer Ministry',
+    'Outreach Ministry',
+    'Fellowship Ministry',
+    'Discipleship Ministry',
+    'Finance Ministry'
+];
+
 export default function Edit({ member, victoryGroups, discipleshipClasses }: Props) {
+    const [newMinistries, setNewMinistries] = useState<NewMinistry[]>([]);
+
+    const addNewMinistry = () => {
+        const newMinistry: NewMinistry = {
+            id: Math.random().toString(36).substr(2, 9),
+            name: '',
+            date_started: '',
+            status: 'active',
+        };
+        setNewMinistries([...newMinistries, newMinistry]);
+    };
+
+    const removeNewMinistry = (id: string) => {
+        setNewMinistries(newMinistries.filter(ministry => ministry.id !== id));
+    };
+
+    const updateNewMinistry = (id: string, field: keyof NewMinistry, value: string) => {
+        setNewMinistries(newMinistries.map(ministry =>
+            ministry.id === id ? { ...ministry, [field]: value } : ministry
+        ));
+    };
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Members',
@@ -90,6 +136,14 @@ export default function Edit({ member, victoryGroups, discipleshipClasses }: Pro
                 <Form action={`/members/${member.id}`} method="patch">
                     {({ errors, hasErrors, processing, wasSuccessful, recentlySuccessful }) => (
                         <div className="space-y-6">
+                            {/* Hidden inputs for new ministries */}
+                            {newMinistries.map((ministry, index) => (
+                                <div key={ministry.id}>
+                                    <input type="hidden" name={`ministries[${index}][name]`} value={ministry.name} />
+                                    <input type="hidden" name={`ministries[${index}][date_started]`} value={ministry.date_started} />
+                                    <input type="hidden" name={`ministries[${index}][status]`} value={ministry.status} />
+                                </div>
+                            ))}
                             {/* Header */}
                             <Card className="bg-green-600 text-white p-6">
                                 <h1 className="text-2xl font-bold text-center">
@@ -196,7 +250,7 @@ export default function Edit({ member, victoryGroups, discipleshipClasses }: Pro
                                             id="date_launched" 
                                             name="date_launched" 
                                             type="date"
-                                            defaultValue={member.date_launched}
+                                            defaultValue={new Date(member.date_launched).toISOString().split('T')[0]}
                                             required 
                                         />
                                         {errors.date_launched && <div className="text-red-600 text-sm mt-1">{errors.date_launched}</div>}
@@ -457,13 +511,18 @@ export default function Edit({ member, victoryGroups, discipleshipClasses }: Pro
                                                         <Label htmlFor={`existing_ministry_${ministry.id}_name`} className="text-sm">
                                                             Ministry Name
                                                         </Label>
-                                                        <Input
-                                                            type="text"
-                                                            id={`existing_ministry_${ministry.id}_name`}
-                                                            name={`existing_ministries[${ministry.id}][name]`}
-                                                            defaultValue={ministry.name}
-                                                            className="mt-1"
-                                                        />
+                                                        <Select name={`existing_ministries[${ministry.id}][name]`} defaultValue={ministry.name}>
+                                                            <SelectTrigger className="mt-1">
+                                                                <SelectValue placeholder="Select ministry" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {MINISTRY_OPTIONS.map((option) => (
+                                                                    <SelectItem key={option} value={option}>
+                                                                        {option}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
                                                     </div>
                                                     
                                                     <div>
@@ -506,57 +565,108 @@ export default function Edit({ member, victoryGroups, discipleshipClasses }: Pro
                                 )}
                                 
                                 <div className="border-t pt-6">
-                                    <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Ministry</h3>
-                                    <p className="text-sm text-gray-600 mb-4">
-                                        Add additional ministry involvement for this member.
-                                    </p>
-                                    
-                                    <div className="space-y-4">
-                                        <div className="border rounded-lg p-4 bg-gray-50">
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                <div>
-                                                    <Label htmlFor="new_ministry_name" className="text-sm">
-                                                        Ministry Name
-                                                    </Label>
-                                                    <Input
-                                                        type="text"
-                                                        id="new_ministry_name"
-                                                        name="ministries[0][name]"
-                                                        placeholder="e.g., Worship Ministry"
-                                                        className="mt-1"
-                                                    />
-                                                </div>
-                                                
-                                                <div>
-                                                    <Label htmlFor="new_ministry_start" className="text-sm">
-                                                        Date Started
-                                                    </Label>
-                                                    <Input
-                                                        type="date"
-                                                        id="new_ministry_start"
-                                                        name="ministries[0][date_started]"
-                                                        className="mt-1"
-                                                    />
-                                                </div>
-                                                
-                                                <div>
-                                                    <Label htmlFor="new_ministry_status" className="text-sm">
-                                                        Status
-                                                    </Label>
-                                                    <Select name="ministries[0][status]" defaultValue="active">
-                                                        <SelectTrigger className="mt-1">
-                                                            <SelectValue placeholder="Select status" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="active">Active</SelectItem>
-                                                            <SelectItem value="rest">Rest</SelectItem>
-                                                            <SelectItem value="release">Released</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-lg font-medium text-gray-900">Add New Ministry</h3>
+                                        <Button type="button" onClick={addNewMinistry}>
+                                            Add Ministry
+                                        </Button>
                                     </div>
+                                    
+                                    {newMinistries.length > 0 ? (
+                                        <div className="space-y-4 mb-4">
+                                            <p className="text-sm text-gray-600">
+                                                Add additional ministry involvement for this member.
+                                            </p>
+                                            {newMinistries.map((ministry, index) => (
+                                                <div key={ministry.id} className="border rounded-lg p-4 bg-gray-50">
+                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                        <div>
+                                                            <Label htmlFor={`new_ministry_${ministry.id}_name`} className="text-sm font-medium">
+                                                                Ministry Name *
+                                                            </Label>
+                                                            <Select
+                                                                value={ministry.name}
+                                                                onValueChange={(value) => updateNewMinistry(ministry.id, 'name', value)}
+                                                            >
+                                                                <SelectTrigger className="mt-1">
+                                                                    <SelectValue placeholder="Select ministry" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {MINISTRY_OPTIONS.map((option) => (
+                                                                        <SelectItem key={option} value={option}>
+                                                                            {option}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {errors[`ministries.${index}.name`] && (
+                                                                <div className="text-red-600 text-sm mt-1">
+                                                                    {errors[`ministries.${index}.name`]}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        <div>
+                                                            <Label htmlFor={`new_ministry_${ministry.id}_date_started`} className="text-sm font-medium">
+                                                                Date Started *
+                                                            </Label>
+                                                            <Input
+                                                                type="date"
+                                                                id={`new_ministry_${ministry.id}_date_started`}
+                                                                value={ministry.date_started}
+                                                                onChange={(e) => updateNewMinistry(ministry.id, 'date_started', e.target.value)}
+                                                                className="mt-1"
+                                                            />
+                                                            {errors[`ministries.${index}.date_started`] && (
+                                                                <div className="text-red-600 text-sm mt-1">
+                                                                    {errors[`ministries.${index}.date_started`]}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        <div>
+                                                            <Label htmlFor={`new_ministry_${ministry.id}_status`} className="text-sm font-medium">
+                                                                Status
+                                                            </Label>
+                                                            <Select
+                                                                value={ministry.status}
+                                                                onValueChange={(value) => updateNewMinistry(ministry.id, 'status', value)}
+                                                            >
+                                                                <SelectTrigger className="mt-1">
+                                                                    <SelectValue placeholder="Select status" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="active">Active</SelectItem>
+                                                                    <SelectItem value="rest">Rest</SelectItem>
+                                                                    <SelectItem value="release">Released</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                            {errors[`ministries.${index}.status`] && (
+                                                                <div className="text-red-600 text-sm mt-1">
+                                                                    {errors[`ministries.${index}.status`]}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="flex justify-end mt-3">
+                                                        <Button
+                                                            type="button"
+                                                            variant="destructive"
+                                                            size="sm"
+                                                            onClick={() => removeNewMinistry(ministry.id)}
+                                                        >
+                                                            Remove Ministry
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-4 mb-4 text-gray-500">
+                                            <p className="text-sm">Click "Add Ministry" to add new ministry involvement for this member.</p>
+                                        </div>
+                                    )}
                                     
                                     <div className="mt-4 text-sm text-gray-600">
                                         <p>💡 <strong>Tips for managing ministries:</strong></p>
@@ -566,6 +676,7 @@ export default function Edit({ member, victoryGroups, discipleshipClasses }: Pro
                                             <li>Use "Rest" for temporary break from ministry</li>
                                             <li>Use "Released" for ministries the member has left</li>
                                             <li>Check "Delete" to permanently remove a ministry record</li>
+                                            <li>Only ministries with both name and date started will be saved</li>
                                         </ul>
                                     </div>
                                 </div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DiscipleshipController;
 use App\Http\Controllers\LeaderController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\MinistryController;
 use App\Http\Controllers\VictoryGroupController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -76,6 +77,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('tokens.activate');
     Route::patch('tokens/{token}/reset-usage', [App\Http\Controllers\FormTokenController::class, 'resetUsage'])
         ->name('tokens.reset-usage');
+
+    // Ministry Management Routes (Admin access)
+    Route::middleware([App\Http\Middleware\AdminMiddleware::class])->group(function () {
+        Route::resource('ministries', MinistryController::class)->only(['index']);
+    });
 });
 
 // Admin routes - require admin middleware
