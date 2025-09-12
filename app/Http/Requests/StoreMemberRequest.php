@@ -37,6 +37,10 @@ class StoreMemberRequest extends FormRequest
             'discipleship_classes.*.selected' => ['sometimes', 'accepted'],
             'discipleship_classes.*.date_started' => ['nullable', 'date', 'before_or_equal:today'],
             'discipleship_classes.*.date_finished' => ['nullable', 'date', 'after_or_equal:discipleship_classes.*.date_started'],
+            'ministries' => ['sometimes', 'array'],
+            'ministries.*.name' => ['required_with:ministries.*', 'string', 'max:255'],
+            'ministries.*.date_started' => ['nullable', 'date', 'before_or_equal:today'],
+            'ministries.*.status' => ['nullable', 'in:active,rest,release'],
         ];
     }
 
@@ -67,6 +71,10 @@ class StoreMemberRequest extends FormRequest
             'victory_group_id.exists' => 'The selected victory group does not exist.',
             'discipleship_classes.*.date_started.before_or_equal' => 'Start date cannot be in the future.',
             'discipleship_classes.*.date_finished.after_or_equal' => 'Finish date must be after or equal to start date.',
+            'ministries.*.name.required_with' => 'Ministry name is required when adding a ministry.',
+            'ministries.*.name.max' => 'Ministry name cannot be longer than 255 characters.',
+            'ministries.*.date_started.before_or_equal' => 'Ministry start date cannot be in the future.',
+            'ministries.*.status.in' => 'Ministry status must be active, rest, or release.',
         ];
     }
 }

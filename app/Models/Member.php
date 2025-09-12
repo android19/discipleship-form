@@ -68,6 +68,14 @@ class Member extends Model
     }
 
     /**
+     * Get the ministries for this member.
+     */
+    public function ministries(): HasMany
+    {
+        return $this->hasMany(Ministry::class);
+    }
+
+    /**
      * Get progress for a specific class.
      */
     public function getClassProgress(string $className): ?MemberDiscipleshipClass

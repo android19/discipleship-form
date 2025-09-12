@@ -74,16 +74,16 @@ export default function Edit({ victoryGroup, leaders }: Props) {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <Label htmlFor="name">Group Name *</Label>
-                                        <Input 
-                                            id="name" 
+                                        <Input
+                                            id="name"
                                             name="name"
                                             defaultValue={victoryGroup.name}
                                             placeholder="e.g., Makati Victory Group, Youth VG"
-                                            required 
+                                            required
                                         />
                                         {errors.name && <div className="text-red-600 text-sm mt-1">{errors.name}</div>}
                                     </div>
-                                    
+
                                     <div>
                                         <Label htmlFor="status">Status *</Label>
                                         <Select name="status" defaultValue={victoryGroup.status} required>
@@ -97,22 +97,22 @@ export default function Edit({ victoryGroup, leaders }: Props) {
                                         </Select>
                                         {errors.status && <div className="text-red-600 text-sm mt-1">{errors.status}</div>}
                                     </div>
-                                    
+
                                     <div>
                                         <Label htmlFor="schedule">Schedule</Label>
-                                        <Input 
-                                            id="schedule" 
+                                        <Input
+                                            id="schedule"
                                             name="schedule"
                                             defaultValue={victoryGroup.schedule || ''}
                                             placeholder="e.g., Saturdays 7:00 PM, Every Sunday 3:00 PM"
                                         />
                                         {errors.schedule && <div className="text-red-600 text-sm mt-1">{errors.schedule}</div>}
                                     </div>
-                                    
+
                                     <div>
                                         <Label htmlFor="venue">Venue</Label>
-                                        <Input 
-                                            id="venue" 
+                                        <Input
+                                            id="venue"
                                             name="venue"
                                             defaultValue={victoryGroup.venue || ''}
                                             placeholder="e.g., Makati City Hall, Online via Zoom"
@@ -154,8 +154,8 @@ export default function Edit({ victoryGroup, leaders }: Props) {
                             {/* Submit Buttons */}
                             <Card className="p-6">
                                 <div className="flex gap-4 justify-end">
-                                    <Button 
-                                        type="button" 
+                                    <Button
+                                        type="button"
                                         variant="outline"
                                         onClick={() => window.history.back()}
                                     >

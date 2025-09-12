@@ -120,6 +120,9 @@ class MemberController extends Controller
             'discipleshipClasses' => function ($query) {
                 $query->orderBy('class_name');
             },
+            'ministries' => function ($query) {
+                $query->orderBy('name');
+            },
         ]);
 
         // Available discipleship classes for reference
@@ -148,6 +151,9 @@ class MemberController extends Controller
             'victoryGroup',
             'discipleshipClasses' => function ($query) {
                 $query->orderBy('class_name');
+            },
+            'ministries' => function ($query) {
+                $query->orderBy('name');
             },
         ]);
 
@@ -179,7 +185,7 @@ class MemberController extends Controller
      */
     public function update(UpdateMemberRequest $request, Member $member): RedirectResponse
     {
-        $memberData = $request->safe()->except(['discipleship_classes', 'existing_classes']);
+        $memberData = $request->safe()->except(['discipleship_classes', 'existing_classes', 'ministries', 'existing_ministries']);
         
         // Handle victory group assignment with "none" value
         if ($memberData['victory_group_id'] === 'none') {
@@ -234,6 +240,43 @@ class MemberController extends Controller
                             'is_completed' => ! empty($classData['date_finished']) || ! empty($classData['is_completed']),
                         ]);
                     }
+                }
+            }
+        }
+
+        // Handle existing ministries (edit/delete)
+        if ($request->has('existing_ministries')) {
+            foreach ($request->existing_ministries as $ministryId => $ministryData) {
+                $existingMinistry = $member->ministries()->find($ministryId);
+                
+                if ($existingMinistry) {
+                    // Check if this ministry should be deleted
+                    if (! empty($ministryData['delete'])) {
+                        $existingMinistry->delete();
+                        continue;
+                    }
+                    
+                    // Update the existing ministry
+                    $updateData = [
+                        'name' => $ministryData['name'] ?? $existingMinistry->name,
+                        'date_started' => $ministryData['date_started'] ?? $existingMinistry->date_started,
+                        'status' => $ministryData['status'] ?? $existingMinistry->status,
+                    ];
+                    
+                    $existingMinistry->update($updateData);
+                }
+            }
+        }
+
+        // Handle new ministries if provided
+        if ($request->has('ministries')) {
+            foreach ($request->ministries as $ministryData) {
+                if (! empty($ministryData['name'])) {
+                    $member->ministries()->create([
+                        'name' => $ministryData['name'],
+                        'date_started' => $ministryData['date_started'] ?? now()->toDateString(),
+                        'status' => $ministryData['status'] ?? 'active',
+                    ]);
                 }
             }
         }

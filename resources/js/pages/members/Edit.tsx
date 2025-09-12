@@ -21,6 +21,17 @@ interface DiscipleshipClass {
     updated_at: string;
 }
 
+interface Ministry {
+    id: number;
+    name: string;
+    date_started: string;
+    status: string;
+    status_label: string;
+    status_color: string;
+    created_at: string;
+    updated_at: string;
+}
+
 interface Member {
     id: number;
     first_name: string;
@@ -36,6 +47,7 @@ interface Member {
     status: string;
     victory_group_id?: number;
     discipleship_classes?: DiscipleshipClass[];
+    ministries?: Ministry[];
     created_at: string;
     updated_at: string;
 }
@@ -405,6 +417,155 @@ export default function Edit({ member, victoryGroups, discipleshipClasses }: Pro
                                             <li>Check "Delete" to remove a class from the member</li>
                                             <li>If a finish date is provided, the class will be automatically marked as completed</li>
                                             <li>Classes with only start dates will be marked as "in progress"</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </Card>
+
+                            {/* Ministries */}
+                            <Card className="p-6">
+                                <h2 className="text-xl font-semibold mb-4 text-green-600">
+                                    Ministry Involvement
+                                </h2>
+                                
+                                {member.ministries && member.ministries.length > 0 ? (
+                                    <div className="space-y-4 mb-6">
+                                        <h3 className="text-lg font-medium text-gray-900">Current Ministries (Edit)</h3>
+                                        {member.ministries.map((ministry) => (
+                                            <div key={ministry.id} className="border rounded-lg p-4 bg-gray-50">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <h4 className="font-medium text-gray-900">
+                                                        {ministry.name}
+                                                    </h4>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`inline-flex px-3 py-1 rounded-full text-sm font-semibold ${ministry.status_color}`}>
+                                                            {ministry.status_label}
+                                                        </span>
+                                                        <Checkbox 
+                                                            name={`existing_ministries[${ministry.id}][delete]`}
+                                                            value="1"
+                                                            id={`delete_ministry_${ministry.id}`}
+                                                        />
+                                                        <Label htmlFor={`delete_ministry_${ministry.id}`} className="text-sm text-red-600">
+                                                            Delete
+                                                        </Label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    <div>
+                                                        <Label htmlFor={`existing_ministry_${ministry.id}_name`} className="text-sm">
+                                                            Ministry Name
+                                                        </Label>
+                                                        <Input
+                                                            type="text"
+                                                            id={`existing_ministry_${ministry.id}_name`}
+                                                            name={`existing_ministries[${ministry.id}][name]`}
+                                                            defaultValue={ministry.name}
+                                                            className="mt-1"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <Label htmlFor={`existing_ministry_${ministry.id}_start`} className="text-sm">
+                                                            Date Started
+                                                        </Label>
+                                                        <Input
+                                                            type="date"
+                                                            id={`existing_ministry_${ministry.id}_start`}
+                                                            name={`existing_ministries[${ministry.id}][date_started]`}
+                                                            defaultValue={new Date(ministry.date_started).toISOString().split('T')[0]}
+                                                            className="mt-1"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <div>
+                                                        <Label htmlFor={`existing_ministry_${ministry.id}_status`} className="text-sm">
+                                                            Status
+                                                        </Label>
+                                                        <Select name={`existing_ministries[${ministry.id}][status]`} defaultValue={ministry.status}>
+                                                            <SelectTrigger className="mt-1">
+                                                                <SelectValue placeholder="Select status" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="active">Active</SelectItem>
+                                                                <SelectItem value="rest">Rest</SelectItem>
+                                                                <SelectItem value="release">Released</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-4 mb-6">
+                                        <div className="text-gray-400 text-lg">🛡️</div>
+                                        <p className="text-gray-600 mt-2">No ministry involvement recorded yet.</p>
+                                    </div>
+                                )}
+                                
+                                <div className="border-t pt-6">
+                                    <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Ministry</h3>
+                                    <p className="text-sm text-gray-600 mb-4">
+                                        Add additional ministry involvement for this member.
+                                    </p>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="border rounded-lg p-4 bg-gray-50">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <div>
+                                                    <Label htmlFor="new_ministry_name" className="text-sm">
+                                                        Ministry Name
+                                                    </Label>
+                                                    <Input
+                                                        type="text"
+                                                        id="new_ministry_name"
+                                                        name="ministries[0][name]"
+                                                        placeholder="e.g., Worship Ministry"
+                                                        className="mt-1"
+                                                    />
+                                                </div>
+                                                
+                                                <div>
+                                                    <Label htmlFor="new_ministry_start" className="text-sm">
+                                                        Date Started
+                                                    </Label>
+                                                    <Input
+                                                        type="date"
+                                                        id="new_ministry_start"
+                                                        name="ministries[0][date_started]"
+                                                        className="mt-1"
+                                                    />
+                                                </div>
+                                                
+                                                <div>
+                                                    <Label htmlFor="new_ministry_status" className="text-sm">
+                                                        Status
+                                                    </Label>
+                                                    <Select name="ministries[0][status]" defaultValue="active">
+                                                        <SelectTrigger className="mt-1">
+                                                            <SelectValue placeholder="Select status" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="active">Active</SelectItem>
+                                                            <SelectItem value="rest">Rest</SelectItem>
+                                                            <SelectItem value="release">Released</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-4 text-sm text-gray-600">
+                                        <p>💡 <strong>Tips for managing ministries:</strong></p>
+                                        <ul className="list-disc list-inside space-y-1 mt-2">
+                                            <li>Edit existing ministry details in the "Current Ministries (Edit)" section above</li>
+                                            <li>Use "Active" for current ministry involvement</li>
+                                            <li>Use "Rest" for temporary break from ministry</li>
+                                            <li>Use "Released" for ministries the member has left</li>
+                                            <li>Check "Delete" to permanently remove a ministry record</li>
                                         </ul>
                                     </div>
                                 </div>

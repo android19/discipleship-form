@@ -46,6 +46,15 @@ class UpdateMemberRequest extends FormRequest
             'existing_classes.*.date_started' => ['nullable', 'date', 'before_or_equal:today'],
             'existing_classes.*.date_finished' => ['nullable', 'date', 'after_or_equal:existing_classes.*.date_started'],
             'existing_classes.*.is_completed' => ['sometimes', 'accepted'],
+            'ministries' => ['sometimes', 'array'],
+            'ministries.*.name' => ['required_with:ministries.*', 'string', 'max:255'],
+            'ministries.*.date_started' => ['nullable', 'date', 'before_or_equal:today'],
+            'ministries.*.status' => ['nullable', 'in:active,rest,release'],
+            'existing_ministries' => ['sometimes', 'array'],
+            'existing_ministries.*.delete' => ['sometimes', 'accepted'],
+            'existing_ministries.*.name' => ['sometimes', 'string', 'max:255'],
+            'existing_ministries.*.date_started' => ['nullable', 'date', 'before_or_equal:today'],
+            'existing_ministries.*.status' => ['nullable', 'in:active,rest,release'],
         ];
     }
 
@@ -77,6 +86,13 @@ class UpdateMemberRequest extends FormRequest
             'discipleship_classes.*.date_finished.after_or_equal' => 'Finish date must be after or equal to start date.',
             'existing_classes.*.date_started.before_or_equal' => 'Start date cannot be in the future.',
             'existing_classes.*.date_finished.after_or_equal' => 'Finish date must be after or equal to start date.',
+            'ministries.*.name.required_with' => 'Ministry name is required when adding a ministry.',
+            'ministries.*.name.max' => 'Ministry name cannot be longer than 255 characters.',
+            'ministries.*.date_started.before_or_equal' => 'Ministry start date cannot be in the future.',
+            'ministries.*.status.in' => 'Ministry status must be active, rest, or release.',
+            'existing_ministries.*.name.max' => 'Ministry name cannot be longer than 255 characters.',
+            'existing_ministries.*.date_started.before_or_equal' => 'Ministry start date cannot be in the future.',
+            'existing_ministries.*.status.in' => 'Ministry status must be active, rest, or release.',
         ];
     }
 }

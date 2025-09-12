@@ -16,6 +16,17 @@ interface DiscipleshipClass {
     updated_at: string;
 }
 
+interface Ministry {
+    id: number;
+    name: string;
+    date_started: string;
+    status: string;
+    status_label: string;
+    status_color: string;
+    created_at: string;
+    updated_at: string;
+}
+
 interface Member {
     id: number;
     first_name: string;
@@ -40,6 +51,7 @@ interface Member {
         };
     };
     discipleship_classes?: DiscipleshipClass[];
+    ministries?: Ministry[];
     created_at: string;
     updated_at: string;
 }
@@ -287,6 +299,58 @@ export default function Show({ member, discipleshipClasses }: Props) {
                             <div className="text-gray-400 text-lg">📚</div>
                             <p className="text-gray-600 mt-2">No discipleship classes recorded yet.</p>
                             <p className="text-gray-500 text-sm mt-1">Classes can be added when editing this member.</p>
+                        </div>
+                    )}
+                </Card>
+
+                {/* Ministries */}
+                <Card className="p-6">
+                    <h2 className="text-xl font-semibold mb-4 text-green-600">
+                        Ministry Involvement
+                    </h2>
+                    
+                    {member.ministries && member.ministries.length > 0 ? (
+                        <div className="space-y-4">
+                            {member.ministries.map((ministry) => (
+                                <div key={ministry.id} className="border rounded-lg p-4 bg-gray-50">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h3 className="font-medium text-gray-900">
+                                            {ministry.name}
+                                        </h3>
+                                        <span className={`inline-flex px-3 py-1 rounded-full text-sm font-semibold ${ministry.status_color}`}>
+                                            {ministry.status_label}
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <div className="font-medium text-gray-600 text-sm">Date Started</div>
+                                            <div className="mt-1">
+                                                {new Date(ministry.date_started).toLocaleDateString('en-US', {
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}
+                                            </div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div className="font-medium text-gray-600 text-sm">Status</div>
+                                            <div className="mt-1">
+                                                <span className="text-gray-900">
+                                                    {ministry.status_label}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8">
+                            <div className="text-gray-400 text-lg">🛡️</div>
+                            <p className="text-gray-600 mt-2">No ministry involvement recorded yet.</p>
+                            <p className="text-gray-500 text-sm mt-1">Ministries can be added when editing this member.</p>
                         </div>
                     )}
                 </Card>
