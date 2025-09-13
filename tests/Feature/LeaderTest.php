@@ -77,7 +77,7 @@ test('leader can be updated', function () {
         'address' => '456 Updated Street',
         'date_launched' => '2024-02-01',
         'status' => 'Active',
-        'coach_id' => $coach->id,
+        'coach_id' => (string) $coach->id,
     ];
 
     $response = $this->put(route('leaders.update', $leader), $updateData);

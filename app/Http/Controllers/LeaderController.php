@@ -125,7 +125,14 @@ class LeaderController extends Controller
      */
     public function update(UpdateLeaderRequest $request, Leader $leader): RedirectResponse
     {
-        $leader->update($request->validated());
+        $leaderData = $request->validated();
+
+        // Handle coach assignment with "none" value
+        if ($leaderData['coach_id'] === 'none') {
+            $leaderData['coach_id'] = null;
+        }
+
+        $leader->update($leaderData);
 
         return redirect()->route('leaders.show', $leader)
             ->with('success', 'Leader updated successfully!');

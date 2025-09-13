@@ -166,7 +166,7 @@ export default function Edit({ leader, coaches }: Props) {
                                             id="date_launched" 
                                             name="date_launched" 
                                             type="date"
-                                            defaultValue={leader.date_launched}
+                                            defaultValue={new Date(leader.date_launched).toISOString().split('T')[0]}
                                             required 
                                         />
                                         {errors.date_launched && <div className="text-red-600 text-sm mt-1">{errors.date_launched}</div>}
@@ -207,18 +207,18 @@ export default function Edit({ leader, coaches }: Props) {
                                 </h2>
                                 <div>
                                     <Label htmlFor="coach_id">Coach</Label>
-                                    <Select name="coach_id" defaultValue={leader.coach_id?.toString() || ''}>
+                                    <Select name="coach_id" defaultValue={leader.coach_id?.toString() || 'none'}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select Coach (optional)" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">No Coach</SelectItem>
+                                            <SelectItem value="none">No Coach</SelectItem>
                                             {coaches && coaches.length > 0 ? coaches.map((coach) => (
                                                 <SelectItem key={coach.id} value={coach.id.toString()}>
                                                     {coach.full_name}
                                                 </SelectItem>
                                             )) : (
-                                                <SelectItem value="" disabled>No coaches available</SelectItem>
+                                                <SelectItem value="unavailable" disabled>No coaches available</SelectItem>
                                             )}
                                         </SelectContent>
                                     </Select>

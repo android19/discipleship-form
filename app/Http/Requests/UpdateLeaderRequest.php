@@ -32,7 +32,11 @@ class UpdateLeaderRequest extends FormRequest
             'address' => ['required', 'string'],
             'date_launched' => ['required', 'date'],
             'status' => ['required', 'in:Active,Inactive'],
-            'coach_id' => ['nullable', 'exists:coaches,id'],
+            'coach_id' => ['nullable', function ($attribute, $value, $fail) {
+                if ($value !== null && $value !== 'none' && !\App\Models\Coach::where('id', $value)->exists()) {
+                    $fail('The selected coach does not exist.');
+                }
+            }],
         ];
     }
 
